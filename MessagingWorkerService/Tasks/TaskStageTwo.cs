@@ -1,19 +1,18 @@
 ﻿using Coravel.Invocable;
+using Newtonsoft.Json;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MessagingWorkerService.Tasks
 {
     public class TaskStageTwo :IInvocable, IInvocableWithPayload<Guid>
     {
         private readonly Services.IBusService _busService;
-        public TaskStageTwo(Services.IBusService busService)
+        private readonly Services.IOutputFileService _outputFileService;
+
+        public TaskStageTwo(Services.IBusService busService, Services.IOutputFileService outputFileService)
         {
             _busService = busService;
+            _outputFileService = outputFileService;
         }
 
         public Guid Payload { get; set; }
@@ -23,10 +22,11 @@ namespace MessagingWorkerService.Tasks
             var messages = await _busService.PeekMessagesAsync(50);
             foreach (var message in messages)
             {
-                string body = message.Body.ToString();
-                //convert to model
+                var body = message.Body.ToString();
+                _outputFileService.CreateCsvOutput(body, "test");
+                _outputFileService.CreateTempTimestampedJsonFile(body, message.MessageId);
             }
-            Log.Debug($"{Payload} Task One Completed");
+            Log.Debug($"{Payload} Task Two Completed");
         }
     }
 }

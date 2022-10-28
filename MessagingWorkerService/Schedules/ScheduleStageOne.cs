@@ -25,7 +25,7 @@ namespace MessagingWorkerService.Schedules
         {
             var request = Guid.NewGuid();
             _queue.QueueInvocableWithPayload<TaskStageOne, Guid>(request);
-            Log.Debug($"{request} Worker Queued for Execution");
+            Log.Debug($"{request} Stage 1 Worker Scheduled for Execution");
             return Task.CompletedTask;
         }
     }
